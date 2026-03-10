@@ -10,10 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4  # 👈 這裡升級成 v4 了！
+        uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential git python3 wget xz-utils
+        # 💡 修正 1：加入了 python3-pip 並安裝 pyelftools
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y build-essential git python3 python3-pip wget xz-utils
+          pip3 install pyelftools
 
       - name: Clone MicroPython
         run: git clone https://github.com/micropython/micropython.git ~/micropython
@@ -28,12 +32,13 @@ jobs:
           tar -xf xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz
 
       - name: Compile .mpy Module
+        # 💡 修正 2：加入了 CROSS_COMPILE=xtensa-esp32s3-elf- 強制指定 S3 編譯器
         run: |
           export PATH=$HOME/xtensa-esp32s3-elf/bin:$PATH
-          make MPY_DIR=~/micropython
+          make MPY_DIR=~/micropython CROSS_COMPILE=xtensa-esp32s3-elf-
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4  # 👈 這裡也升級成 v4 了！
+        uses: actions/upload-artifact@v4
         with:
           name: hif_engine_mpy
           path: hif_engine.mpy
