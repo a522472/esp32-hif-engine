@@ -1,0 +1,39 @@
+name: Build ESP32-S3 .mpy Module
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential git python3 wget xz-utils
+
+      - name: Clone MicroPython
+        run: git clone https://github.com/micropython/micropython.git ~/micropython
+
+      - name: Build mpy-cross
+        run: make -C ~/micropython/mpy-cross
+
+      - name: Download ESP32-S3 Toolchain
+        run: |
+          cd ~
+          wget https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz
+          tar -xf xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz
+
+      - name: Compile .mpy Module
+        run: |
+          export PATH=$HOME/xtensa-esp32s3-elf/bin:$PATH
+          make MPY_DIR=~/micropython
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hif_engine_mpy
+          path: hif_engine.mpy
