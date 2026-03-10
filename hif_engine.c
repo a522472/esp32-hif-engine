@@ -4,7 +4,6 @@
 #define GPIO_OUT_W1TC_REG 0x6000400C
 #define GPIO_IN_REG       0x6000403C
 
-// 💡 這裡換成小寫的 static 了！
 static mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
     mp_buffer_info_t out_bufinfo;
     mp_buffer_info_t in_bufinfo;
@@ -15,8 +14,11 @@ static mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
     uint32_t pre_delay = mp_obj_get_int(args[2]);
     uint32_t post_delay = mp_obj_get_int(args[3]);
 
-    size_t length = out_bufinfo.len / 2;
-    uint8_t *out_data = (uint8_t *)out_bufinfo.buf;
+    // 💡 升級為 32 位元：長度計算要除以 sizeof(uint32_t)，再除以 2 (因為是 set, clr 兩兩一組)
+    size_t length = (out_bufinfo.len / sizeof(uint32_t)) / 2;
+    
+    // 💡 指標升級為 uint32_t，才能容納高達 2048 的腳位遮罩！
+    uint32_t *out_data = (uint32_t *)out_bufinfo.buf;
     uint32_t *in_data = (uint32_t *)in_bufinfo.buf;
 
     volatile uint32_t *gpio_w1ts = (volatile uint32_t *)GPIO_OUT_W1TS_REG;
@@ -25,8 +27,9 @@ static mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
 
     size_t out_idx = 0;
     for (size_t i = 0; i < length; i++) {
-        uint8_t set_m = out_data[out_idx++];
-        uint8_t clr_m = out_data[out_idx++];
+        // 💡 讀取出來的狀態也升級為 32 位元
+        uint32_t set_m = out_data[out_idx++];
+        uint32_t clr_m = out_data[out_idx++];
 
         *gpio_w1tc = clr_m;
         *gpio_w1ts = set_m;
@@ -44,7 +47,6 @@ static mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
     return mp_const_none;
 }
 
-// 💡 這裡也換成小寫的 static！
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(hif_engine_play_obj, 4, 4, hif_engine_play);
 
 mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *args) {
