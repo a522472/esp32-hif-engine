@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # 👈 這裡升級成 v4 了！
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential git python3 wget xz-utils
@@ -33,7 +33,7 @@ jobs:
           make MPY_DIR=~/micropython
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # 👈 這裡也升級成 v4 了！
         with:
           name: hif_engine_mpy
           path: hif_engine.mpy
