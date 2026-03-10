@@ -4,7 +4,8 @@
 #define GPIO_OUT_W1TC_REG 0x6000400C
 #define GPIO_IN_REG       0x6000403C
 
-STATIC mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
+// 💡 這裡換成小寫的 static 了！
+static mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
     mp_buffer_info_t out_bufinfo;
     mp_buffer_info_t in_bufinfo;
     
@@ -43,7 +44,8 @@ STATIC mp_obj_t hif_engine_play(size_t n_args, const mp_obj_t *args) {
     return mp_const_none;
 }
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(hif_engine_play_obj, 4, 4, hif_engine_play);
+// 💡 這裡也換成小寫的 static！
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(hif_engine_play_obj, 4, 4, hif_engine_play);
 
 mp_obj_t mpy_init(mp_obj_fun_bc_t *self, size_t n_args, size_t n_kw, mp_obj_t *args) {
     MP_DYNRUNTIME_INIT_ENTRY
